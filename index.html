@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Builder - Architecture Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            backdrop-filter: blur(10px);
+            padding: 50px;
+            border-radius: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.6s ease-out;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #555;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+
+        .section {
+            background: linear-gradient(135deg, #ffffff 0%, #fef9ff 100%);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.6s ease-out forwards;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section:nth-child(2) { animation-delay: 0.1s; }
+        .section:nth-child(3) { animation-delay: 0.2s; }
+        .section:nth-child(4) { animation-delay: 0.3s; }
+        .section:nth-child(5) { animation-delay: 0.4s; }
+        .section:nth-child(6) { animation-delay: 0.5s; }
+        .section:nth-child(7) { animation-delay: 0.6s; }
+        .section:nth-child(8) { animation-delay: 0.7s; }
+        .section:nth-child(9) { animation-delay: 0.8s; }
+
+        h2 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 4px solid transparent;
+            border-image: linear-gradient(90deg, #667eea, #764ba2, #f093fb) 1;
+            font-size: 2.2em;
+            font-weight: bold;
+        }
+
+        h3 {
+            background: linear-gradient(135deg, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+            font-weight: bold;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .tech-card {
+            background: linear-gradient(135deg, #667eea15, #f093fb15);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid;
+            border-image: linear-gradient(180deg, #667eea, #f093fb) 1;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tech-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #667eea25, #f093fb25);
+        }
+
+        .tech-card h4 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .onion-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 50px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9ff, #fff5fb);
+            border-radius: 20px;
+        }
+
+        .onion-diagram {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 900px;
+        }
+
+        .onion-layer {
+            padding: 35px;
+            border-radius: 20px;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .onion-layer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .onion-layer:hover::before {
+            opacity: 1;
+        }
+
+        .onion-layer:hover {
+            transform: scale(1.08) rotate(2deg);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .layer-domain {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .layer-application {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .layer-infrastructure {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .layer-presentation {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .layer-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .layer-desc {
+            font-size: 0.95em;
+            font-weight: normal;
+            opacity: 0.95;
+        }
+
+        .workflow-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin: 35px 0;
+        }
+
+        .workflow-step {
+            color: white;
+            padding: 18px 30px;
+            border-radius: 15px;
+            position: relative;
+            animation: slideInLeft 0.5s ease-out forwards;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .workflow-step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .workflow-step:nth-child(1) { animation-delay: 0.1s; background: linear-gradient(90deg, #ff6b6b, #ee5a6f); }
+        .workflow-step:nth-child(2) { animation-delay: 0.2s; background: linear-gradient(90deg, #4ecdc4, #44a08d); }
+        .workflow-step:nth-child(3) { animation-delay: 0.3s; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .workflow-step:nth-child(4) { animation-delay: 0.4s; background: linear-gradient(90deg, #f093fb, #f5576c); }
+        .workflow-step:nth-child(5) { animation-delay: 0.5s; background: linear-gradient(90deg, #ffa751, #ffe259); }
+        .workflow-step:nth-child(6) { animation-delay: 0.6s; background: linear-gradient(90deg, #13547a, #80d0c7); }
+        .workflow-step:nth-child(7) { animation-delay: 0.7s; background: linear-gradient(90deg, #ff6b6b, #ee5a6f); }
+        .workflow-step:nth-child(8) { animation-delay: 0.8s; background: linear-gradient(90deg, #4ecdc4, #44a08d); }
+        .workflow-step:nth-child(9) { animation-delay: 0.9s; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .workflow-step:nth-child(10) { animation-delay: 1s; background: linear-gradient(90deg, #f093fb, #f5576c); }
+        .workflow-step:nth-child(11) { animation-delay: 1.1s; background: linear-gradient(90deg, #ffa751, #ffe259); }
+        .workflow-step:nth-child(12) { animation-delay: 1.2s; background: linear-gradient(90deg, #13547a, #80d0c7); }
+
+        .workflow-step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            color: #667eea;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: 3px solid currentColor;
+        }
+
+        .db-schema {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .db-table {
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .db-table:hover {
+            transform: translateY(-8px) rotate(1deg);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .db-table:nth-child(1) .db-table-header { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+        .db-table:nth-child(2) .db-table-header { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .db-table:nth-child(3) .db-table-header { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .db-table:nth-child(4) .db-table-header { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .db-table:nth-child(5) .db-table-header { background: linear-gradient(135deg, #ffa751, #ffe259); }
+        .db-table:nth-child(6) .db-table-header { background: linear-gradient(135deg, #13547a, #80d0c7); }
+        .db-table:nth-child(7) .db-table-header { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+        .db-table:nth-child(8) .db-table-header { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+
+        .db-table-header {
+            color: white;
+            padding: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .db-table-body {
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff, #f8f9ff);
+        }
+
+        .db-field {
+            padding: 10px 0;
+            border-bottom: 2px solid #e8e8e8;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .db-field:last-child {
+            border-bottom: none;
+        }
+
+        .api-endpoint {
+            background: linear-gradient(135deg, #f8f9ff, #fff5fb);
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .api-endpoint:hover {
+            transform: translateX(8px);
+            background: linear-gradient(135deg, #eef1ff, #ffe8f7);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .api-method {
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9em;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .api-method.post { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .api-method.get { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .api-method.put { background: linear-gradient(135deg, #ffa751, #ffe259); }
+        .api-method.delete { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+        .api-method.grpc { background: linear-gradient(135deg, #f093fb, #f5576c); }
+
+        .api-path {
+            font-family: 'Courier New', monospace;
+            color: #333;
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .api-desc {
+            color: #666;
+            font-size: 0.95em;
+            flex: 2;
+        }
+
+        .directory-tree {
+            background: linear-gradient(135deg, #1e1e1e, #2d2d30);
+            color: #d4d4d4;
+            padding: 30px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            line-height: 1.8;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 3px solid #3e3e42;
+        }
+
+        .tree-item { display: block; }
+        .tree-folder { color: #4ec9b0; font-weight: bold; }
+        .tree-file { color: #9cdcfe; }
+
+        .testing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .test-card {
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .test-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .test-card:nth-child(1) { background: linear-gradient(135deg, #ff6b6b15, #ee5a6f15); border-top: 5px solid #ff6b6b; }
+        .test-card:nth-child(2) { background: linear-gradient(135deg, #4ecdc415, #44a08d15); border-top: 5px solid #4ecdc4; }
+        .test-card:nth-child(3) { background: linear-gradient(135deg, #667eea15, #764ba215); border-top: 5px solid #667eea; }
+        .test-card:nth-child(4) { background: linear-gradient(135deg, #f093fb15, #f5576c15); border-top: 5px solid #f093fb; }
+        .test-card:nth-child(5) { background: linear-gradient(135deg, #ffa75115, #ffe25915); border-top: 5px solid #ffa751; }
+        .test-card:nth-child(6) { background: linear-gradient(135deg, #13547a15, #80d0c715); border-top: 5px solid #13547a; }
+
+        .test-card h4 {
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+        }
+
+        .badge {
+            display: inline-block;
+            color: rgb(61, 60, 60);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 6px 6px 6px 0;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge:nth-child(1) { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+        .badge:nth-child(2) { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .badge:nth-child(3) { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .badge:nth-child(4) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+
+        .input-sources {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin: 35px 0;
+        }
+
+        .input-box {
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 220px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .input-box:nth-child(1) { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+        .input-box:nth-child(2) { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+        .input-box:nth-child(3) { background: linear-gradient(135deg, #667eea, #764ba2); }
+
+        .input-box:hover {
+            transform: translateY(-12px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .input-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .security-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .security-item {
+            background: linear-gradient(135deg, #f8f9ff, #fff5fb);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .security-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .security-item:nth-child(1) { border-left-color: #ff6b6b; }
+        .security-item:nth-child(2) { border-left-color: #4ecdc4; }
+        .security-item:nth-child(3) { border-left-color: #667eea; }
+        .security-item:nth-child(4) { border-left-color: #f093fb; }
+        .security-item:nth-child(5) { border-left-color: #ffa751; }
+        .security-item:nth-child(6) { border-left-color: #13547a; }
+
+        .security-item strong {
+            background: linear-gradient(135deg, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 35px;
+            color: #666;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        footer p:first-child {
+            font-size: 1.3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📘 Course Builder Microservice</h1>
+            <p class="subtitle">AI-Driven Course Generation & Publishing Platform</p>
+        </header>
+
+        <div class="section">
+            <h2>🎯 High-Level Overview</h2>
+            <p><strong>Purpose:</strong> AI-driven orchestrator that generates, validates, and publishes modular courses.</p>
+            
+            <h3>Input Sources</h3>
+            <div class="input-sources">
+                <div class="input-box">
+                    <h4>🤖 Learner AI</h4>
+                    <p>Learning path + skills</p>
+                </div>
+                <div class="input-box">
+                    <h4>🛒 Marketplace</h4>
+                    <p>Course description</p>
+                </div>
+                <div class="input-box">
+                    <h4>🎨 Content Studio</h4>
+                    <p>Course name trigger</p>
+                </div>
+            </div>
+
+            <h3>Core Capabilities</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Skill Expansion</h4>
+                    <p>Expands general skills into micro-skills via Skills Engine</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Modular Structure</h4>
+                    <p>Builds Topics → Modules → Lessons hierarchy</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Content Generation</h4>
+                    <p>Delegates lesson creation to Content Studio with full context</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Assessment Integration</h4>
+                    <p>Redirects learners to Assessment microservice</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Content Enrichment</h4>
+                    <p>Optionally enriches with YouTube/GitHub APIs</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Publishing Control</h4>
+                    <p>Immediate or scheduled publishing to Marketplace</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚙️ Technology Stack</h2>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Frontend</h4>
+                    <p><strong>Framework:</strong> React (SPA + SSR)</p>
+                    <p><strong>Hosting:</strong> Vercel</p>
+                    <p><strong>Features:</strong> Learner UI, Admin Dashboard</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Backend</h4>
+                    <p><strong>Runtime:</strong> Node.js + Express</p>
+                    <p><strong>Hosting:</strong> Railway</p>
+                    <p><strong>Architecture:</strong> Onion Architecture</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Database</h4>
+                    <p><strong>Type:</strong> PostgreSQL</p>
+                    <p><strong>Hosting:</strong> Supabase</p>
+                    <p><strong>Features:</strong> Versioning, Relations</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Protocols</h4>
+                    <p><strong>Primary:</strong> REST APIs</p>
+                    <p><strong>Internal:</strong> gRPC (RAG, Content Studio, Assessment)</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Testing</h4>
+                    <p><strong>Methodology:</strong> TDD</p>
+                    <p><strong>Tools:</strong> Jest, Supertest, Cypress</p>
+                    <p><strong>Integration:</strong> CI/CD Pipeline</p>
+                </div>
+                <div class="tech-card">
+                    <h4>CI/CD</h4>
+                    <p><strong>Platform:</strong> GitHub Actions</p>
+                    <p><strong>Deployment:</strong> Automated to Railway & Vercel</p>
+                </div>
+            </div>
+
+            <h3>Security Architecture</h3>
+            <div class="security-features">
+                <div class="security-item">
+                    <strong>Authentication:</strong> OAuth2 for inter-service calls
+                </div>
+                <div class="security-item">
+                    <strong>Authorization:</strong> RBAC (Role-Based Access Control)
+                </div>
+                <div class="security-item">
+                    <strong>Data at Rest:</strong> AES-256 encryption
+                </div>
+                <div class="security-item">
+                    <strong>Data in Transit:</strong> TLS 1.3
+                </div>
+                <div class="security-item">
+                    <strong>Tokens:</strong> JWT with short lifetimes
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧅 Onion Architecture</h2>
+            <p>Course Builder follows Onion Architecture to enforce separation of concerns and maintain independence of business logic from frameworks and UI.</p>
+            
+            <div class="onion-container">
+                <div class="onion-diagram">
+                    <div class="onion-layer layer-domain">
+                        <div class="layer-title">Domain Layer</div>
+                        <div class="layer-desc">Entities & Business Rules</div>
+                    </div>
+                    <div class="onion-layer layer-application">
+                        <div class="layer-title">Application Layer</div>
+                        <div class="layer-desc">Use Cases & Orchestration</div>
+                    </div>
+                    <div class="onion-layer layer-infrastructure">
+                        <div class="layer-title">Infrastructure Layer</div>
+                        <div class="layer-desc">Repos, API Clients, Integrations</div>
+                    </div>
+                    <div class="onion-layer layer-presentation">
+                        <div class="layer-title">Presentation Layer</div>
+                        <div class="layer-desc">Controllers, UI, Middleware</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Domain Layer (Core)</h3>
+            <div class="tech-card">
+                <h4>Entities</h4>
+                <p>Course, Module, Lesson, Skill, Assessment, Feedback, Version</p>
+                <h4>Business Rules</h4>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>Course = Topics → Modules → Lessons hierarchy</li>
+                    <li>Metadata must align with skills & learning goals</li>
+                    <li>Prerequisites between modules enforced</li>
+                    <li>Structural changes always create a new version</li>
+                </ul>
+            </div>
+
+            <h3>Application Layer</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>InputService</h4>
+                    <p>Handles triggers from multiple sources</p>
+                </div>
+                <div class="tech-card">
+                    <h4>CourseStructureService</h4>
+                    <p>Expands skills and builds modular structure</p>
+                </div>
+                <div class="tech-card">
+                    <h4>ContentDelegationService</h4>
+                    <p>Sends context to Content Studio for lesson generation</p>
+                </div>
+                <div class="tech-card">
+                    <h4>PublishingService</h4>
+                    <p>Manages immediate/scheduled publishing</p>
+                </div>
+                <div class="tech-card">
+                    <h4>AssessmentService</h4>
+                    <p>Redirects to Assessment microservice</p>
+                </div>
+                <div class="tech-card">
+                    <h4>FeedbackService</h4>
+                    <p>Collects and distributes learner ratings</p>
+                </div>
+                <div class="tech-card">
+                    <h4>AnalyticsService</h4>
+                    <p>Shares engagement data with analytics systems</p>
+                </div>
+                <div class="tech-card">
+                    <h4>CredentialService</h4>
+                    <p>Issues micro-credentials via Credly</p>
+                </div>
+                <div class="tech-card">
+                    <h4>CourseWorkflowOrchestrator</h4>
+                    <p>Central orchestrator for the full workflow</p>
+                </div>
+            </div>
+
+            <h3>Infrastructure Layer</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Repositories</h4>
+                    <p>CourseRepo, LearnerRepo, FeedbackRepo, VersionRepo</p>
+                </div>
+                <div class="tech-card">
+                    <h4>API Clients</h4>
+                    <p>Skills Engine, Content Studio (gRPC), Assessment (gRPC), Marketplace, Directory, Analytics, HR, RAG (gRPC), Credly</p>
+                </div>
+                <div class="tech-card">
+                    <h4>External Integrations</h4>
+                    <p>YouTube API, GitHub API</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Utilities</h4>
+                    <p>Logger, RetryQueue, Config</p>
+                </div>
+            </div>
+
+            <h3>Presentation Layer</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Learner UI (React)</h4>
+                    <p>Registration, lesson access, feedback form</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Admin Dashboard</h4>
+                    <p>Course structure viewer, publishing controls, version viewer</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Express Controllers</h4>
+                    <p>CourseController, PublishingController, FeedbackController, RegistrationController</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Workflow & Flow Logic</h2>
+            <div class="workflow-diagram">
+                <div class="workflow-step" data-step="1">
+                    <strong>Input Reception</strong> - Receive triggers from Learner AI, Marketplace, or Content Studio
+                </div>
+                <div class="workflow-step" data-step="2">
+                    <strong>Course Existence Check</strong> - Query DB for existing course → republish if found, else continue
+                </div>
+                <div class="workflow-step" data-step="3">
+                    <strong>Skill Expansion</strong> - Call Skills Engine to expand general skills into micro-skills
+                </div>
+                <div class="workflow-step" data-step="4">
+                    <strong>Structure Generation</strong> - Build hierarchical structure: Course → Topics → Modules → Lessons
+                </div>
+                <div class="workflow-step" data-step="5">
+                    <strong>Content Studio Request</strong> - Send course info, skills, learning path, learner/company context via gRPC
+                </div>
+                <div class="workflow-step" data-step="6">
+                    <strong>Content Enrichment (Optional)</strong> - Enhance with YouTube videos and GitHub repositories
+                </div>
+                <div class="workflow-step" data-step="7">
+                    <strong>Metadata Validation & AI Tagging</strong> - Validate structure and apply intelligent tags
+                </div>
+                <div class="workflow-step" data-step="8">
+                    <strong>Storage with Versioning</strong> - Persist course in PostgreSQL with version tracking
+                </div>
+                <div class="workflow-step" data-step="9">
+                    <strong>Publishing</strong> - Publish immediately or schedule for future release
+                </div>
+                <div class="workflow-step" data-step="10">
+                    <strong>Learner Registration & Study</strong> - Learners register and access course content
+                </div>
+                <div class="workflow-step" data-step="11">
+                    <strong>Assessment</strong> - Redirect to Assessment microservice via gRPC with learner ID + coverage map
+                </div>
+                <div class="workflow-step" data-step="12">
+                    <strong>Completion & Feedback</strong> - Share analytics, issue credentials, collect feedback
+                </div>
+            </div>
+
+            <h3>Data Distribution on Completion</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Learning Analytics</h4>
+                    <p>Course progress, completion rates, structure, ratings, topics studied, level</p>
+                </div>
+                <div class="tech-card">
+                    <h4>HR System</h4>
+                    <p>Reports and course data (registered/active participants)</p>
+                </div>
+                <div class="tech-card">
+                    <h4>RAG System</h4>
+                    <p>Course metadata for contextual knowledge graph enrichment</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Credly</h4>
+                    <p>Completion credentials for badge issuance</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Directory + Marketplace</h4>
+                    <p>Learner ratings and feedback</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🗄️ Database Schema (PostgreSQL)</h2>
+            <div class="db-schema">
+                <div class="db-table">
+                    <div class="db-table-header">courses</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">title</div>
+                        <div class="db-field">description</div>
+                        <div class="db-field">metadata</div>
+                        <div class="db-field">status (ENUM)</div>
+                        <div class="db-field">level</div>
+                        <div class="db-field">created_at</div>
+                    </div>
+                </div>
+
+                <div class="db-table">
+                    <div class="db-table-header">modules</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">course_id (FK)</div>
+                        <div class="db-field">title</div>
+                        <div class="db-field">order</div>
+                        <div class="db-field">metadata</div>
+                    </div>
+                </div>
+
+                <div class="db-table">
+                    <div class="db-table-header">lessons</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">module_id (FK)</div>
+                        <div class="db-field">title</div>
+                        <div class="db-field">order</div>
+                        <div class="db-field">content_ref</div>
+                        <div class="db-field">language_variants</div>
+                    </div>
+                </div>
+
+                <div class="db-table">
+                    <div class="db-table-header">skills</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">course_id (FK)</div>
+                        <div class="db-field">type</div>
+                        <div class="db-field">source</div>
+                    </div>
+                </div>
+
+                <div class="db-table">
+                    <div class="db-table-header">assessments</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">course_id (FK)</div>
+                        <div class="db-field">learner_id (FK)</div>
+                        <div class="db-field">coverage_map</div>
+                        <div class="db-field">report</div>
+                    </div>
+                </div>
+
+                <div class="db-table">
+                    <div class="db-table-header">versions</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">course_id (FK)</div>
+                        <div class="db-field">version_no</div>
+                        <div class="db-field">status (ENUM)</div>
+                        <div class="db-field">scheduled_at</div>
+                        <div class="db-field">created_at</div>
+                    </div>
+                </div>
+
+                <div class="db-table">
+                    <div class="db-table-header">registrations</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">course_id (FK)</div>
+                        <div class="db-field">learner_id (FK)</div>
+                        <div class="db-field">company_id (FK)</div>
+                        <div class="db-field">progress</div>
+                    </div>
+                </div>
+
+                <div class="db-table">
+                    <div class="db-table-header">feedback</div>
+                    <div class="db-table-body">
+                        <div class="db-field">id (PK)</div>
+                        <div class="db-field">course_id (FK)</div>
+                        <div class="db-field">learner_id (FK)</div>
+                        <div class="db-field">rating</div>
+                        <div class="db-field">tags</div>
+                        <div class="db-field">comment</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Database Constraints</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Foreign Keys</h4>
+                    <p>modules.course_id → courses.id</p>
+                    <p>lessons.module_id → modules.id</p>
+                    <p>All relationships enforced</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Status ENUM</h4>
+                    <p>Values: draft, live, scheduled</p>
+                    <p>Enforced at database level</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Versioning</h4>
+                    <p>New version created on structural changes</p>
+                    <p>Historical tracking enabled</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔌 API Endpoints</h2>
+            
+            <h3>REST Endpoints</h3>
+            <div class="api-endpoint">
+                <span class="api-method post">POST</span>
+                <span class="api-path">/api/v1/courses</span>
+                <span class="api-desc">Generate new course</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method get">GET</span>
+                <span class="api-path">/api/v1/courses/:id</span>
+                <span class="api-desc">Get course details and metadata</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method put">PUT</span>
+                <span class="api-path">/api/v1/courses/:id</span>
+                <span class="api-desc">Update course metadata</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method delete">DELETE</span>
+                <span class="api-path">/api/v1/courses/:id</span>
+                <span class="api-desc">Soft-delete course</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method post">POST</span>
+                <span class="api-path">/api/v1/courses/:id/publish</span>
+                <span class="api-desc">Publish course immediately to Marketplace</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method post">POST</span>
+                <span class="api-path">/api/v1/courses/:id/schedule</span>
+                <span class="api-desc">Schedule publishing for future date</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method post">POST</span>
+                <span class="api-path">/api/v1/courses/:id/register</span>
+                <span class="api-desc">Register learner to course</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method post">POST</span>
+                <span class="api-path">/api/v1/courses/:id/feedback</span>
+                <span class="api-desc">Submit learner rating and feedback</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method get">GET</span>
+                <span class="api-path">/api/v1/feedback/:id</span>
+                <span class="api-desc">Get aggregated ratings and feedback</span>
+            </div>
+
+            <h3>gRPC Services</h3>
+            <div class="api-endpoint">
+                <span class="api-method grpc">gRPC</span>
+                <span class="api-path">RAGService.GetRecommendations</span>
+                <span class="api-desc">Provides contextual assistance and knowledge graph data</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method grpc">gRPC</span>
+                <span class="api-path">ContentStudioService.GenerateLessons</span>
+                <span class="api-desc">Send course info, skills, learning path, learner/company context for lesson generation</span>
+            </div>
+            <div class="api-endpoint">
+                <span class="api-method grpc">gRPC</span>
+                <span class="api-path">AssessmentService.StartAssessment</span>
+                <span class="api-desc">Start learner assessment (send learner ID + coverage map, receive report)</span>
+            </div>
+        </div>
+
+        <div class="section">
+    <h2>📁 Directory Structure</h2>
+    
+    <h3>Backend Structure</h3>
+    <div class="directory-tree">
+<span class="tree-item">/backend</span>
+<span class="tree-item"> ├── src</span>
+
+<!-- DOMAIN -->
+<span class="tree-item"> │   ├── <span class="tree-folder">domain</span></span>
+<span class="tree-item"> │   │   ├── <span class="tree-folder">entities</span></span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">Course.js</span> – Core course entity (metadata, modules, status)</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">Module.js</span> – Module entity (belongs to course, ordered)</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">Lesson.js</span> – Lesson entity (belongs to module, content ref)</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">Skill.js</span> – Skill entity (links course to micro-skills)</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">Assessment.js</span> – Assessment entity (learner coverage + report)</span>
+<span class="tree-item"> │   │   │   └── <span class="tree-file">Feedback.js</span> – Feedback entity (rating, comments, tags)</span>
+
+<span class="tree-item"> │   │   └── <span class="tree-folder">services</span></span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">CourseStructureService.js</span> – expandSkills(), buildStructure()</span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">ContentDelegationService.js</span> – sendCourseData(), validateLessonMetadata()</span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">AssessmentService.js</span> – startAssessment(), receiveReport()</span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">PublishingService.js</span> – publishNow(), schedulePublishing()</span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">FeedbackService.js</span> – collectFeedback(), distributeFeedback()</span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">AnalyticsService.js</span> – sendLearningAnalytics(), sendHRReport()</span>
+<span class="tree-item"> │   │       └── <span class="tree-file">CredentialService.js</span> – issueCredential()</span>
+
+<!-- APPLICATION -->
+<span class="tree-item"> │   ├── <span class="tree-folder">application</span></span>
+<span class="tree-item"> │   │   ├── <span class="tree-file">InputService.js</span> – receiveFromLearnerAI(), receiveFromMarketplace(), receiveFromContentStudio()</span>
+<span class="tree-item"> │   │   └── <span class="tree-file">CourseWorkflowOrchestrator.js</span> – startWorkflow(), checkCourseExistence(), expandSkills(), generateStructure(), delegateContent(), validateAndTag(), storeCourse(), publishCourse(), startAssessment(), receiveAssessmentReport(), sendAnalytics(), finalize()</span>
+
+<!-- INFRASTRUCTURE -->
+<span class="tree-item"> │   ├── <span class="tree-folder">infrastructure</span></span>
+<span class="tree-item"> │   │   ├── <span class="tree-folder">db</span></span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">CourseRepo.js</span> – DB access for courses</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">LearnerRepo.js</span> – DB access for learners</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">FeedbackRepo.js</span> – DB access for feedback</span>
+<span class="tree-item"> │   │   │   └── <span class="tree-file">VersionRepo.js</span> – DB access for course versions</span>
+
+<span class="tree-item"> │   │   ├── <span class="tree-folder">api-clients</span></span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">SkillsEngineClient.js</span> – Calls Skills Engine</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">ContentStudioClient.js</span> – gRPC client for Content Studio</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">AssessmentClient.js</span> – gRPC client for Assessment</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">MarketplaceClient.js</span> – Connects to Marketplace</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">DirectoryClient.js</span> – Connects to Directory</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">AnalyticsClient.js</span> – Connects to Learning Analytics</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">HRClient.js</span> – Connects to HR system</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">RAGClient.js</span> – gRPC client for RAG</span>
+<span class="tree-item"> │   │   │   └── <span class="tree-file">CredlyClient.js</span> – Issues badges via Credly</span>
+
+<span class="tree-item"> │   │   ├── <span class="tree-folder">integrations</span></span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">YouTubeAPI.js</span> – Fetches video content</span>
+<span class="tree-item"> │   │   │   └── <span class="tree-file">GitHubAPI.js</span> – Fetches code examples</span>
+
+<span class="tree-item"> │   │   ├── <span class="tree-folder">queue</span></span>
+<span class="tree-item"> │   │   │   └── <span class="tree-file">RetryQueue.js</span> – Handles retries for failed requests</span>
+
+<span class="tree-item"> │   │   └── <span class="tree-folder">config</span></span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">dbConfig.js</span> – Database config</span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">apiConfig.js</span> – API endpoints/config</span>
+<span class="tree-item"> │   │       └── <span class="tree-file">securityConfig.js</span> – Security & encryption settings</span>
+
+<!-- PRESENTATION -->
+<span class="tree-item"> │   ├── <span class="tree-folder">presentation</span></span>
+<span class="tree-item"> │   │   ├── <span class="tree-folder">controllers</span></span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">CourseController.js</span> – createCourse(), getCourse(), updateCourse(), deleteCourse()</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">PublishingController.js</span> – publishNow(), schedulePublishing()</span>
+<span class="tree-item"> │   │   │   ├── <span class="tree-file">FeedbackController.js</span> – submitFeedback(), getFeedback()</span>
+<span class="tree-item"> │   │   │   └── <span class="tree-file">RegistrationController.js</span> – registerLearner(), startAssessment()</span>
+
+<span class="tree-item"> │   │   └── <span class="tree-folder">middlewares</span></span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">AuthMiddleware.js</span> – verifyToken()</span>
+<span class="tree-item"> │   │       ├── <span class="tree-file">ErrorHandler.js</span> – handleError()</span>
+<span class="tree-item"> │   │       └── <span class="tree-file">Logger.js</span> – logRequest()</span>
+
+<!-- TESTS -->
+<span class="tree-item"> │   ├── <span class="tree-folder">tests</span></span>
+<span class="tree-item"> │   │   ├── <span class="tree-folder">unit</span> – Unit tests for services & repos</span>
+<span class="tree-item"> │   │   ├── <span class="tree-folder">integration</span> – Integration tests (end-to-end flows)</span>
+<span class="tree-item"> │   │   └── <span class="tree-folder">e2e</span> – Learner journey tests</span>
+
+<span class="tree-item"> │   └── <span class="tree-file">index.js</span> – Backend entry point</span>
+<span class="tree-item"> └── <span class="tree-file">package.json</span></span>
+    </div>
+
+    <h3>Frontend Structure</h3>
+    <div class="directory-tree">
+<span class="tree-item">/frontend</span>
+<span class="tree-item"> ├── <span class="tree-folder">pages</span></span>
+<span class="tree-item"> │   ├── <span class="tree-file">index.jsx</span> – HomePage()</span>
+<span class="tree-item"> │   ├── <span class="tree-file">course/[id].jsx</span> – CoursePage({ id })</span>
+<span class="tree-item"> │   ├── <span class="tree-file">register/[id].jsx</span> – RegisterPage({ id })</span>
+<span class="tree-item"> │   ├── <span class="tree-file">feedback/[id].jsx</span> – FeedbackPage({ id })</span>
+<span class="tree-item"> │   └── <span class="tree-file">admin/PublishingDashboard.jsx</span> – PublishingDashboard()</span>
+
+<span class="tree-item"> ├── <span class="tree-folder">components</span></span>
+<span class="tree-item"> │   ├── <span class="tree-file">CourseCard.jsx</span> – Displays course preview</span>
+<span class="tree-item"> │   ├── <span class="tree-file">LessonViewer.jsx</span> – Shows lesson content</span>
+<span class="tree-item"> │   ├── <span class="tree-file">FeedbackForm.jsx</span> – Learner feedback form</span>
+<span class="tree-item"> │   ├── <span class="tree-file">RegistrationForm.jsx</span> – Learner registration form</span>
+<span class="tree-item"> │   ├── <span class="tree-file">CourseTreeView.jsx</span> – Visualizes course structure</span>
+<span class="tree-item"> │   ├── <span class="tree-file">MetadataPanel.jsx</span> – Shows metadata & tags</span>
+<span class="tree-item"> │   └── <span class="tree-file">PublishControls.jsx</span> – Controls for publishing</span>
+
+<span class="tree-item"> ├── <span class="tree-file">services/api.js</span> – API calls to backend</span>
+<span class="tree-item"> ├── <span class="tree-file">store/state.js</span> – State management</span>
+<span class="tree-item"> ├── <span class="tree-folder">utils/</span> – Shared utilities</span>
+<span class="tree-item"> └── <span class="tree-file">package.json</span></span>
+    </div>
+</div>
+
+
+        <div class="section">
+            <h2>🧪 Testing Strategy</h2>
+            <p><strong>Methodology:</strong> Test-Driven Development (TDD)</p>
+            <p>Write failing tests → Implement code → Make tests pass → Refactor</p>
+
+            <div class="testing-grid">
+                <div class="test-card">
+                    <h4>Unit Tests</h4>
+                    <p><strong>Tools:</strong> Jest</p>
+                    <p><strong>Coverage:</strong> Services, Repositories, Entities</p>
+                    <p><strong>Focus:</strong> Individual function correctness</p>
+                    <span class="badge">Jest</span>
+                </div>
+
+                <div class="test-card">
+                    <h4>Integration Tests</h4>
+                    <p><strong>Tools:</strong> Supertest</p>
+                    <p><strong>Coverage:</strong> Full workflow from input to publish</p>
+                    <p><strong>Focus:</strong> Service interactions</p>
+                    <span class="badge">Supertest</span>
+                </div>
+
+                <div class="test-card">
+                    <h4>Performance Tests</h4>
+                    <p><strong>Target:</strong> 5k concurrent learners</p>
+                    <p><strong>Metrics:</strong> Response time, throughput, resource usage</p>
+                    <p><strong>Focus:</strong> Scalability validation</p>
+                    <span class="badge">Load Testing</span>
+                </div>
+
+                <div class="test-card">
+                    <h4>Security Tests</h4>
+                    <p><strong>Areas:</strong> OAuth2, RBAC, GDPR compliance</p>
+                    <p><strong>Tools:</strong> Automated security scanners</p>
+                    <p><strong>Focus:</strong> Vulnerability detection</p>
+                    <span class="badge">Security</span>
+                </div>
+
+                <div class="test-card">
+                    <h4>Code Review</h4>
+                    <p><strong>Checks:</strong> Readability, architecture, security</p>
+                    <p><strong>Tools:</strong> Automated lint & style checks</p>
+                    <span class="badge">Quality</span>
+                </div>
+            </div>
+
+            <h3>Code Quality Principles</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>TDD Ensures "It Works"</h4>
+                    <p>Tests verify correctness and prevent regressions</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Code Review Ensures "It Looks Good"</h4>
+                    <p>Readability, maintainability, and architecture consistency</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Onion Boundaries Enforced</h4>
+                    <p>Domain layer remains independent of frameworks</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 CI/CD Pipeline</h2>
+            <div class="workflow-diagram">
+                <div class="workflow-step" data-step="1">
+                    <strong>Code Push</strong> - Developer pushes code to GitHub repository
+                </div>
+                <div class="workflow-step" data-step="2">
+                    <strong>Lint & Format</strong> - Automated code style and formatting checks
+                </div>
+                <div class="workflow-step" data-step="3">
+                    <strong>Unit Tests</strong> - Run Jest unit tests for all services and entities
+                </div>
+                <div class="workflow-step" data-step="4">
+                    <strong>Integration Tests</strong> - Run Supertest integration tests for API workflows
+                </div>
+                <div class="workflow-step" data-step="5">
+                    <strong>Build Backend</strong> - Compile and bundle Node.js application
+                </div>
+                <div class="workflow-step" data-step="6">
+                    <strong>Build Frontend</strong> - Build React application with SSR+SPA support
+                </div>
+                <div class="workflow-step" data-step="7">
+                    <strong>Deploy to Railway</strong> - Deploy backend to Railway platform
+                </div>
+                <div class="workflow-step" data-step="8">
+                    <strong>Deploy to Vercel</strong> - Deploy frontend to Vercel platform
+                </div>
+            </div>
+
+            <div class="tech-grid" style="margin-top: 30px;">
+                <div class="tech-card">
+                    <h4>GitHub Actions</h4>
+                    <p>Automated CI/CD pipeline triggered on push and pull requests</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Railway Deployment</h4>
+                    <p>Backend automatically deployed with zero-downtime updates</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Vercel Deployment</h4>
+                    <p>Frontend deployed with automatic preview environments for PRs</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Course Builder Microservice</strong> - AI-Driven Course Generation & Publishing Platform</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Onion Architecture | TDD | Microservices | gRPC | REST</p>
+        </footer>
+    </div>
+</body>
+</html>
